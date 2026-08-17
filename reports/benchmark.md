@@ -5,22 +5,22 @@
 - Cases: **11**
 - Passed: **11/11**
 - Evidence hit rate: **100.0%**
-- Average retrieval latency: **867.2 ms**
-- Average token reduction vs full source context: **14.2%**
+- Average retrieval latency: **944.9 ms**
+- Average token reduction vs full source context: **19.0%**
 
 | Case | Layer | Pass | Latency ms | Retrieved tokens | Token reduction | Missing / Error |
 | --- | --- | --- | ---: | ---: | ---: | --- |
 | E01 | short_term | PASS | 0.0 | 133 | 0.0% |  |
-| E06 | semantic | PASS | 446.2 | 148 | 67.8% |  |
-| E09 | long_term | PASS | 1448.9 | 745 | 0.0% |  |
-| E10 | short_term | PASS | 0.2 | 195 | 0.0% |  |
-| E02 | long_term | PASS | 1543.5 | 1485 | 0.0% |  |
-| E03 | long_term | PASS | 1382.2 | 1491 | 0.0% |  |
-| E04 | episodic | PASS | 293.0 | 284 | 0.0% |  |
-| E05 | episodic | PASS | 277.5 | 303 | 0.0% |  |
-| E07 | mixed | PASS | 1824.3 | 485 | 14.2% |  |
-| E11 | semantic | PASS | 305.6 | 146 | 74.2% |  |
-| E08 | long_term | PASS | 2018.2 | 1481 | 0.0% |  |
+| E06 | semantic | PASS | 440.6 | 56 | 87.8% |  |
+| E09 | long_term | PASS | 1425.1 | 797 | 0.0% |  |
+| E10 | short_term | PASS | 0.6 | 195 | 0.0% |  |
+| E02 | long_term | PASS | 1519.0 | 1490 | 0.0% |  |
+| E03 | long_term | PASS | 1964.4 | 1491 | 0.0% |  |
+| E04 | episodic | PASS | 591.0 | 866 | 0.0% |  |
+| E05 | episodic | PASS | 551.9 | 886 | 0.0% |  |
+| E07 | mixed | PASS | 2140.2 | 392 | 30.6% |  |
+| E11 | semantic | PASS | 249.0 | 55 | 90.3% |  |
+| E08 | long_term | PASS | 1512.1 | 1492 | 0.0% |  |
 
 ## Evidence excerpts
 
@@ -30,7 +30,7 @@
 
 ### E06 - semantic
 
-`EPISODE: {"id":"kb-payment-retry","entity":"Payment API Retry Policy","summary":"For POST /payments, every retryable request MUST send the same Idempotency-Key. Retry only HTTP 429 or transient 5xx errors, use exponential-backoff, and stop after max-3-retries. Marker: PAYMENT-RULE-3.","source":"internal-api-guideline-v3","updated_at":"2026-08-10T00:00:00Z"} metadata= EPISODE: For POST /payments, every retryable request MUST send the same Idempotency-Key. Retry only HTTP 429 or transient 5xx errors, use exponential-backoff, and stop after max-3-retries. Marker: PAYMENT-RULE-3. metadata=`
+`EPISODE: For POST /payments, every retryable request MUST send the same Idempotency-Key. Retry only HTTP 429 or transient 5xx errors, use exponential-backoff, and stop after max-3-retries. Marker: PAYMENT-RULE-3. metadata=`
 
 ### E09 - long_term
 
@@ -50,11 +50,11 @@
 
 ### E04 - episodic
 
-`EPISODE: Ten du an ca nhan cua toi la ORCHID-27. Toi thich Python va khong thich Java. Khi giai thich code, hay dung vi du ngan. EPISODE: Toi dang hoc async/await va hay nham coroutine voi Task. Neu sau nay gap chu de nay, hay giai thich bang timeline. EPISODE: TODO: hoan thanh benchmark report truoc thu Sau luc 16:00. Day la open loop LAB-REPORT-1600. EPISODE: Hom nay toi debug async HTTP. Toi da thu tang timeout len 60s nhung van fail. EPISODE: Cach hieu qua la reuse aiohttp ClientSession va dat concurrency=20. Reflection: loi chinh la connection churn, khong phai timeout threshold. Ma su co ASYNC-FIX-20. EPISODE: Da ghi nhan trajectory: increase timeout khong hieu qua; ClientSession + con`
+`FACT: Minh Nguyen failed to debug async HTTP even after increasing the timeout to 60s. [valid_at=2026-08-03T10:00:00Z, invalid_at=2026-08-03T10:03:00Z] FACT: Minh Nguyen is debugging async HTTP. [valid_at=2026-08-03T10:00:00Z, invalid_at=None] FACT: Minh Nguyen increased the timeout to 60s. [valid_at=2026-08-03T10:00:00Z, invalid_at=2026-08-03T10:03:00Z] FACT: Minh Nguyen associated the issue with ASYNC-FIX-20. [valid_at=2026-08-03T10:03:00Z, invalid_at=None] FACT: Minh Nguyen requested that if the topic of async/await comes up later, it should be explained using a timeline. [valid_at=2026-08-01T09:02:00Z, invalid_at=None] FACT: Minh Nguyen is learning async/await. [valid_at=2026-08-01T09:02`
 
 ### E05 - episodic
 
-`EPISODE: Ten du an ca nhan cua toi la ORCHID-27. Toi thich Python va khong thich Java. Khi giai thich code, hay dung vi du ngan. EPISODE: Toi dang hoc async/await va hay nham coroutine voi Task. Neu sau nay gap chu de nay, hay giai thich bang timeline. EPISODE: TODO: hoan thanh benchmark report truoc thu Sau luc 16:00. Day la open loop LAB-REPORT-1600. EPISODE: Hom nay toi debug async HTTP. Toi da thu tang timeout len 60s nhung van fail. EPISODE: Hay kiem tra connection pool, lifecycle cua client va concurrency. EPISODE: Cach hieu qua la reuse aiohttp ClientSession va dat concurrency=20. Reflection: loi chinh la connection churn, khong phai timeout threshold. Ma su co ASYNC-FIX-20. EPISODE: `
+`FACT: Minh Nguyen failed to debug async HTTP even after increasing the timeout to 60s. [valid_at=2026-08-03T10:00:00Z, invalid_at=2026-08-03T10:03:00Z] FACT: Minh Nguyen associated the issue with ASYNC-FIX-20. [valid_at=2026-08-03T10:03:00Z, invalid_at=None] FACT: Minh Nguyen is debugging async HTTP. [valid_at=2026-08-03T10:00:00Z, invalid_at=None] FACT: Minh Nguyen requested that if the topic of async/await comes up later, it should be explained using a timeline. [valid_at=2026-08-01T09:02:00Z, invalid_at=None] FACT: Minh Nguyen increased the timeout to 60s. [valid_at=2026-08-03T10:00:00Z, invalid_at=2026-08-03T10:03:00Z] FACT: connection churn is the main cause, not timeout threshold. [val`
 
 ### E07 - mixed
 
@@ -62,7 +62,7 @@
 
 ### E11 - semantic
 
-`EPISODE: {"id":"kb-async-http","entity":"Async HTTP Incident Playbook","summary":"When async HTTP calls time out, inspect connection pooling, downstream saturation and concurrency before increasing timeout. Reuse a long-lived client session where possible. Marker: CONN-POOL-FIRST.","source":"incident-playbook-2026","updated_at":"2026-08-11T00:00:00Z"} metadata= EPISODE: When async HTTP calls time out, inspect connection pooling, downstream saturation and concurrency before increasing timeout. Reuse a long-lived client session where possible. Marker: CONN-POOL-FIRST. metadata=`
+`EPISODE: When async HTTP calls time out, inspect connection pooling, downstream saturation and concurrency before increasing timeout. Reuse a long-lived client session where possible. Marker: CONN-POOL-FIRST. metadata=`
 
 ### E08 - long_term
 

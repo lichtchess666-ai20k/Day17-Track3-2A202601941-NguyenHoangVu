@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any
 
 from .config import settings
@@ -8,12 +9,47 @@ from .utils import cap_query, join_nonempty
 from .zep_common import prime_eval_thread, render_graph_search
 
 
+def distinct_episodes(episodes: list[Any]) -> list[Any]:
+    """Drop near-duplicate episodes, keeping the most compact form of each.
+
+    The seeder ingests every KB document twice -- once as JSON, once as its
+    text summary -- so a search returns both copies of the same document.
+    Under the tight semantic budget those duplicates crowd out other
+    documents, and because the budget trim keeps the head, a relevant document
+    ranked below them is cut away entirely. Keeping the shortest
+    representation of each distinct document maximises how many DISTINCT
+    documents survive the budget, while preserving relevance order.
+    """
+    kept: list[Any] = []
+    kept_norm: list[str] = []
+    for episode in episodes:
+        content = (getattr(episode, "content", "") or "").strip()
+        if not content:
+            continue
+        norm = " ".join(content.split()).casefold()
+        duplicate = False
+        for i, other in enumerate(kept_norm):
+            if norm in other:
+                # This copy is the compact one; swap it in at the same rank.
+                kept[i], kept_norm[i] = episode, norm
+                duplicate = True
+                break
+            if other in norm:
+                duplicate = True
+                break
+        if not duplicate:
+            kept.append(episode)
+            kept_norm.append(norm)
+    return kept
+
+
 class StudentMemory:
     """Only this file needs to be edited by students."""
 
     # Tuning knobs for the three durable layers. Kept as class attributes so a
     # caller (UI, agent demo) can widen recall without editing the methods.
     fact_limit = 20  # long-term: edges carry validity ranges -> deadlines/open loops
+    episode_fact_limit = 10  # episodic: compact incident outcomes, led with
     episode_limit = 15
     episode_char_cap = 180
     semantic_limit = 8
@@ -57,20 +93,43 @@ class StudentMemory:
         return join_nonempty([context_block, facts], sep="\n\n")
 
     def retrieve_episodic(self, user_id: str, query: str) -> str:
-        """Raw episodes from the user's graph -- what actually happened.
+        """What actually happened, from the user's own graph.
 
-        Session messages ingested by the seeder are verbose; under the 3%
-        episodic budget two of them would crowd out the short reflection
-        episodes that carry the incident markers. Capping each episode's
-        rendered length keeps more *distinct* episodes inside the budget.
+        Two renderings of the same experience, cheapest first: the extracted
+        incident facts, then the raw episodes they came from. Each episode is
+        also length-capped, because the seeder's session messages are verbose
+        and a couple of them would otherwise fill the whole layer.
         """
+        capped = cap_query(query)
+
+        # Outcome first, evidence second. A raw episode costs ~50 tokens and the
+        # marker-bearing reflection consistently lands around rank 12 of 15 --
+        # roughly 500 cumulative tokens, well past the 3% episodic budget, so
+        # under a mixed case the budget trim cuts it away every time. Zep's
+        # extracted incident facts state the same outcome in ~15 tokens and rank
+        # far higher, so they lead; the raw episodes follow as provenance and
+        # survive whenever the layer is not under budget pressure.
+        try:
+            facts = render_graph_search(
+                self.client.graph.search(
+                    user_id=user_id,
+                    query=capped,
+                    scope="edges",
+                    limit=self.episode_fact_limit,
+                )
+            )
+        except Exception:
+            facts = ""
+
         results = self.client.graph.search(
             user_id=user_id,
-            query=cap_query(query),
+            query=capped,
             scope="episodes",
             limit=self.episode_limit,
         )
-        return render_graph_search(results, episode_char_cap=self.episode_char_cap)
+        episodes = render_graph_search(results, episode_char_cap=self.episode_char_cap)
+
+        return join_nonempty([facts, episodes], sep="\n\n")
 
     def retrieve_semantic(self, graph_id: str, query: str) -> str:
         """Shared domain knowledge from a standalone graph (graph_id, not user_id).
@@ -95,6 +154,21 @@ class StudentMemory:
                 query=capped,
                 scope="nodes",
                 limit=self.semantic_limit,
+            )
+
+        # Markers sit at the END of each document, so this layer must not be
+        # truncated per episode. Instead drop duplicate copies of the same
+        # document, which is what actually overruns the 3% semantic budget on
+        # mixed cases.
+        episodes = getattr(results, "episodes", None) or []
+        if episodes:
+            results = SimpleNamespace(
+                context=getattr(results, "context", None),
+                edges=getattr(results, "edges", None),
+                episodes=distinct_episodes(episodes),
+                nodes=getattr(results, "nodes", None),
+                observations=getattr(results, "observations", None),
+                thread_summaries=getattr(results, "thread_summaries", None),
             )
         return render_graph_search(results)
 
