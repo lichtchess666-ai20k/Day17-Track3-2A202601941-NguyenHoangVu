@@ -14,6 +14,9 @@ load_dotenv(ROOT / ".env")
 class Settings:
     zep_api_key: str = os.getenv("ZEP_API_KEY", "")
     semantic_graph_id: str = os.getenv("ZEP_SEMANTIC_GRAPH_ID", "vinuni-lab17-domain-kb")
+    # Standalone organization-knowledge graph shared by every user's agent.
+    # Distinct from semantic_graph_id, which the benchmark seeds and scores.
+    org_graph_id: str = os.getenv("ZEP_ORG_GRAPH_ID", "zep_org_knowledge_27962943b524")
     redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     qdrant_url: str = os.getenv("QDRANT_URL", "http://localhost:6333")
     context_tokens: int = int(os.getenv("LAB_CONTEXT_TOKENS", "8000"))

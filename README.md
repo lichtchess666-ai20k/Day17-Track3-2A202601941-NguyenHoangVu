@@ -13,6 +13,66 @@ Bo starter kit cho buoi lab 150-180 phut ve Memory Systems for Agents.
 
 > Luu y 2026: lab dung **Zep Cloud V3 SDK**. Docker dong goi app/client va cac local baseline; khong khoi dong Zep Community Edition cu.
 
+## Zep memory layer (`src/zep_memory.py`)
+
+`ZepMemory` is the product-facing wrapper the application calls. `zep_common.py`
+stays what it was: benchmark plumbing (seed, staged ingest, search rendering).
+
+| Step | Call | `ZepMemory` method |
+| --- | --- | --- |
+| User signs up | `client.user.add` | `on_signup(user_id, email=..., ...)` |
+| New conversation | `client.thread.create` | `start_thread(user_id)` |
+| Every message | `client.thread.add_messages` | `record_message` / `record_turn` |
+| Before each LLM call | `client.thread.get_user_context` | `build_system_prompt(thread_id)` |
+| Orders / tickets / events | `client.graph.add(user_id=...)` | `add_business_data(user_id, payload)` |
+| Shared org knowledge | `client.graph.add(graph_id=...)` | `add_org_knowledge(payload)` |
+
+```python
+from src.zep_memory import ZepMemory
+
+zep = ZepMemory()                       # reads ZEP_API_KEY from .env
+zep.on_signup("user-123", email="jane@example.com", first_name="Jane")
+thread_id = zep.start_thread("user-123")
+
+zep.record_message(thread_id, "user", user_text)
+system_prompt = zep.build_system_prompt(thread_id)   # context block included
+reply = call_your_llm(system_prompt, user_text)
+zep.record_message(thread_id, "assistant", reply)
+
+zep.add_business_data("user-123", {"event_type": "deployment", "version": "v2.14.0"})
+zep.add_org_knowledge({"doc_type": "engineering_policy", "title": "Deploy freeze"})
+```
+
+`on_signup` is idempotent, message content passes through `minimize_pii`
+before it is persisted, and `get_context_block` returns `""` instead of raising
+when Zep is unreachable — a chat turn degrades to "no memory" rather than
+failing.
+
+**Two standalone graphs, different jobs.** `ZEP_SEMANTIC_GRAPH_ID`
+(`vinuni-lab17-domain-kb`) is the lab's domain KB — seeded and scored by the
+benchmark. `ZEP_ORG_GRAPH_ID` (`zep_org_knowledge_*`) is the shared
+organization-knowledge graph every user's agent can read. Both are addressed by
+`graph_id`, never by `user_id`.
+
+**Custom ontology.** Entity types `CodeRepository`, `TechnicalDecision`,
+`CodingConvention`, `RuntimeEnvironment`, `EngineeringIncident` and edge types
+`WORKS_ON`, `DECIDED_IN`, `FOLLOWS_CONVENTION`, `RUNS_IN`, `OWNS` are applied to
+the project out-of-band. `zep_memory.ENTITY_TYPES` / `EDGE_TYPES` mirror them so
+searches can be narrowed:
+
+```python
+zep.search_user_graph("user-123", "which repo?", scope="edges", edge_types=["WORKS_ON"])
+zep.search_org_knowledge("deploy freeze policy")
+```
+
+Walk the whole flow against real Zep:
+
+```bash
+make zep-demo            # or: python -m src.demo_zep_integration --cleanup
+```
+
+`ZEP_API_KEY` lives in `.env` only (gitignored) — never commit it.
+
 ## Quick start
 
 ```bash

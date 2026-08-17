@@ -1,0 +1,841 @@
+<title>Bốn Tầng Ký Ức</title>
+<style>
+  :root {
+    --ground:      #EDEEF1;
+    --surface:     #FBFBFC;
+    --surface-2:   #E4E6EB;
+    --ink:         #15181E;
+    --ink-2:       #3B434F;
+    --muted:       #59616E;
+    --line:        #D5D9DF;
+    --line-strong: #B8BEC8;
+
+    --st:   #2F5D8A;
+    --lt:   #8A2F62;
+    --ep:   #9A6321;
+    --sem:  #146B63;
+    --st-bg:  #DCE7F1;
+    --lt-bg:  #F0DCE7;
+    --ep-bg:  #F2E5D2;
+    --sem-bg: #D5E8E5;
+
+    --good: #1B6B45;
+    --bad:  #8C2F2F;
+
+    --display: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: "SF Mono", "Cascadia Mono", "Segoe UI Mono", Consolas, "Liberation Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0F1217;
+      --surface:     #171B22;
+      --surface-2:   #1F242D;
+      --ink:         #E6E9ED;
+      --ink-2:       #C2C9D2;
+      --muted:       #96A0AD;
+      --line:        #262C36;
+      --line-strong: #3A424F;
+
+      --st:   #7FB0DC;
+      --lt:   #D98CB4;
+      --ep:   #DCA860;
+      --sem:  #5FB8AE;
+      --st-bg:  #1B2A3A;
+      --lt-bg:  #33202B;
+      --ep-bg:  #33291A;
+      --sem-bg: #16302E;
+
+      --good: #6FC79A;
+      --bad:  #E08585;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      #0F1217;
+    --surface:     #171B22;
+    --surface-2:   #1F242D;
+    --ink:         #E6E9ED;
+    --ink-2:       #C2C9D2;
+    --muted:       #96A0AD;
+    --line:        #262C36;
+    --line-strong: #3A424F;
+
+    --st:   #7FB0DC;
+    --lt:   #D98CB4;
+    --ep:   #DCA860;
+    --sem:  #5FB8AE;
+    --st-bg:  #1B2A3A;
+    --lt-bg:  #33202B;
+    --ep-bg:  #33291A;
+    --sem-bg: #16302E;
+
+    --good: #6FC79A;
+    --bad:  #E08585;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.65;
+    margin: 0;
+    padding: 0 24px 96px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .col   { max-width: 68ch; margin-inline: auto; }
+  .wide  { max-width: 1080px; margin-inline: auto; }
+
+  /* ---------- masthead ---------- */
+  header.mast {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 72px 0 40px;
+    border-bottom: 2px solid var(--line-strong);
+  }
+  .kicker {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 20px;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(38px, 6vw, 62px);
+    line-height: 1.04;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin: 0 0 18px;
+  }
+  .standfirst {
+    font-size: 20px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    max-width: 60ch;
+    margin: 0;
+  }
+
+  .scoreline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px 44px;
+    margin-top: 36px;
+    padding-top: 26px;
+    border-top: 1px solid var(--line);
+  }
+  .score .n {
+    font-family: var(--display);
+    font-size: 34px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    display: block;
+  }
+  .score .l {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-top: 8px;
+  }
+
+  /* ---------- sections ---------- */
+  section { padding-top: 64px; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 12px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .eyebrow::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(26px, 3.4vw, 34px);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 20px;
+  }
+  h3 {
+    font-family: var(--body);
+    font-weight: 650;
+    font-size: 17px;
+    letter-spacing: 0.005em;
+    margin: 34px 0 10px;
+  }
+  p { margin: 0 0 18px; }
+  .col > p:last-child, .col > ul:last-child { margin-bottom: 0; }
+
+  ul, ol { margin: 0 0 18px; padding-left: 22px; }
+  li { margin-bottom: 9px; }
+  li::marker { color: var(--muted); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.87em;
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    word-break: break-word;
+  }
+  strong { font-weight: 650; }
+  a { color: var(--lt); }
+
+  /* ---------- layer cards ---------- */
+  .layers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(238px, 1fr));
+    gap: 18px;
+    margin-top: 8px;
+  }
+  .layer {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--c);
+    border-radius: 2px;
+    padding: 20px 20px 22px;
+  }
+  .layer .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 10px;
+  }
+  .layer h4 {
+    font-family: var(--display);
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0 0 10px;
+    line-height: 1.25;
+  }
+  .layer p { font-size: 14.5px; line-height: 1.55; color: var(--ink-2); margin: 0 0 12px; }
+  .layer .api {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    display: block;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    word-break: break-word;
+  }
+  .l-st  { --c: var(--st); }
+  .l-lt  { --c: var(--lt); }
+  .l-ep  { --c: var(--ep); }
+  .l-sem { --c: var(--sem); }
+
+  /* ---------- budget stratigraphy ---------- */
+  .strat {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 28px 26px 24px;
+    margin: 10px 0 22px;
+  }
+  .strat-row {
+    display: grid;
+    grid-template-columns: 118px 1fr 92px;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .strat-row:last-of-type { margin-bottom: 0; }
+  .strat-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c);
+    font-weight: 600;
+  }
+  .track {
+    background: var(--surface-2);
+    height: 26px;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  .fill { height: 100%; background: var(--c); }
+  .strat-val {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+    text-align: right;
+  }
+  .strat-note {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 20px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  /* ---------- tables ---------- */
+  .tablewrap { overflow-x: auto; margin: 6px 0 20px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+    min-width: 560px;
+  }
+  caption {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 10px;
+  }
+  th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 0 14px 9px 0;
+    border-bottom: 1px solid var(--line-strong);
+    white-space: nowrap;
+  }
+  td {
+    padding: 10px 14px 10px 0;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  th.num { padding-right: 0; }
+  td.num { padding-right: 0; }
+
+  .pill {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .p-st  { background: var(--st-bg);  color: var(--st); }
+  .p-lt  { background: var(--lt-bg);  color: var(--lt); }
+  .p-ep  { background: var(--ep-bg);  color: var(--ep); }
+  .p-sem { background: var(--sem-bg); color: var(--sem); }
+  .p-mix { background: var(--surface-2); color: var(--ink-2); }
+  .pass { color: var(--good); font-weight: 650; }
+  .fail { color: var(--bad); font-weight: 650; }
+
+  /* ---------- flow ---------- */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: stretch;
+    margin: 8px 0 20px;
+  }
+  .step {
+    flex: 1 1 168px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--line-strong);
+    border-radius: 2px;
+    padding: 14px 15px;
+  }
+  .step .i {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 7px;
+  }
+  .step .c {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+    word-break: break-word;
+  }
+  .step .d { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+
+  /* ---------- callout ---------- */
+  .note {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--c, var(--line-strong));
+    border-radius: 2px;
+    padding: 18px 20px;
+    margin: 0 0 20px;
+    font-size: 15px;
+  }
+  .note p:last-child { margin-bottom: 0; }
+  .note .h {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c, var(--muted));
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+  }
+  .n-trap { --c: var(--ep); }
+  .n-key  { --c: var(--lt); }
+
+  /* ---------- ontology ---------- */
+  .onto {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin: 6px 0 20px;
+  }
+  .onto div {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 13px 15px;
+  }
+  .onto .t {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--sem);
+    display: block;
+    margin-bottom: 5px;
+    word-break: break-word;
+  }
+  .onto .s { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+
+  footer {
+    max-width: 1080px;
+    margin: 80px auto 0;
+    padding-top: 28px;
+    border-top: 2px solid var(--line-strong);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 0 18px 72px; }
+    header.mast { padding-top: 48px; }
+    .strat-row { grid-template-columns: 92px 1fr 78px; gap: 10px; }
+    .scoreline { gap: 22px 30px; }
+  }
+</style>
+
+<header class="mast">
+  <p class="kicker">VinUni AI20K · Day 17 · Track 3</p>
+  <h1>Bốn tầng ký ức của một agent</h1>
+  <p class="standfirst">
+    Tổng kết Lab 17: xây dựng và đo đạc short-term, long-term, episodic và semantic
+    memory trên Zep Cloud V3 — cùng những gì con số thực sự nói ra.
+  </p>
+  <div class="scoreline">
+    <div class="score"><span class="n">11/11</span><span class="l">Practice PASS</span></div>
+    <div class="score"><span class="n">2/11</span><span class="l">No-memory baseline</span></div>
+    <div class="score"><span class="n">100%</span><span class="l">Evidence hit rate</span></div>
+    <div class="score"><span class="n">1094<span style="font-size:16px">ms</span></span><span class="l">Latency trung bình</span></div>
+  </div>
+</header>
+
+<section class="col">
+  <p class="eyebrow">Ý tưởng trung tâm</p>
+  <h2>Ký ức không phải một cái hộp</h2>
+  <p>
+    Sai lầm đầu tiên khi làm agent có trí nhớ là gom tất cả vào một chỗ rồi
+    nhét vào prompt. Lab này tách ký ức thành <strong>bốn tầng khác nhau về
+    bản chất</strong> — khác nhau ở nguồn gốc, vòng đời, phạm vi sở hữu và
+    cách truy hồi.
+  </p>
+  <p>
+    Điểm mấu chốt: <em>retrieval được chấm trực tiếp</em>. Evaluator so khớp
+    chuỗi bằng chứng (<code>must_contain_all</code>) trong text truy hồi được,
+    không để LLM sinh câu trả lời. Vì nếu chấm qua LLM, một mô hình đủ giỏi sẽ
+    "nói nghe hợp lý" và che lấp việc tầng ký ức bên dưới đã hỏng.
+  </p>
+</section>
+
+<section class="wide">
+  <p class="eyebrow">Bản đồ</p>
+  <h2>Bốn tầng, bốn nghề khác nhau</h2>
+  <div class="layers">
+    <div class="layer l-st">
+      <span class="tag">Short-term</span>
+      <h4>Trí nhớ làm việc</h4>
+      <p>Vài lượt gần nhất của hội thoại hiện tại. Chạy <strong>hoàn toàn local</strong>, không gọi Zep. Bị giới hạn cứng bởi context window nên phải nén.</p>
+      <span class="api">ShortTermMemory · buffer / summary / sliding</span>
+    </div>
+    <div class="layer l-lt">
+      <span class="tag">Long-term</span>
+      <h4>Sự thật bền vững</h4>
+      <p>Preference, quyết định, open loop sống xuyên thread và xuyên session. Thuộc về <strong>một user cụ thể</strong>. Zep tự trích xuất thành fact có mốc thời gian.</p>
+      <span class="api">thread.get_user_context → .context</span>
+    </div>
+    <div class="layer l-ep">
+      <span class="tag">Episodic</span>
+      <h4>Trải nghiệm đã sống</h4>
+      <p>"Lần trước ta đã làm gì, kết quả ra sao." Giữ nguyên trajectory và reflection kèm provenance — thứ mà một fact cô đọng làm mất.</p>
+      <span class="api">graph.search(user_id=…, scope="episodes")</span>
+    </div>
+    <div class="layer l-sem">
+      <span class="tag">Semantic</span>
+      <h4>Tri thức dùng chung</h4>
+      <p>Policy, playbook, tài liệu nội bộ. <strong>Không thuộc user nào</strong> — nằm trên standalone graph để mọi agent cùng đọc.</p>
+      <span class="api">graph.search(graph_id=…, scope="episodes")</span>
+    </div>
+  </div>
+</section>
+
+<section class="col">
+  <p class="eyebrow">Zep Cloud V3</p>
+  <h2>Vòng đời một cuộc hội thoại</h2>
+  <p>
+    Trong V3, "session" được gọi là <strong>thread</strong>. Toàn bộ tích hợp
+    gói gọn trong bốn lời gọi, cộng thêm <code>graph.add</code> cho dữ liệu
+    không phải chat.
+  </p>
+</section>
+
+<div class="wide">
+  <div class="flow">
+    <div class="step">
+      <span class="i">Khi user đăng ký</span>
+      <span class="c">user.add</span>
+      <span class="d">Tạo user Zep bằng chính internal ID của hệ thống.</span>
+    </div>
+    <div class="step">
+      <span class="i">Mỗi hội thoại mới</span>
+      <span class="c">thread.create</span>
+      <span class="d">Mở thread gắn với user đó.</span>
+    </div>
+    <div class="step">
+      <span class="i">Mỗi tin nhắn</span>
+      <span class="c">thread.add_messages</span>
+      <span class="d">Ghi cả lượt user lẫn lượt assistant.</span>
+    </div>
+    <div class="step">
+      <span class="i">Trước mỗi lần gọi LLM</span>
+      <span class="c">thread.get_user_context</span>
+      <span class="d">Lấy context block, ghép vào system prompt.</span>
+    </div>
+  </div>
+</div>
+
+<section class="col">
+  <div class="note n-key">
+    <span class="h">Chi tiết dễ bỏ qua</span>
+    <p>
+      Context block <strong>phụ thuộc thread</strong>. Zep quyết định lôi gì ra
+      từ user graph dựa trên nội dung hiện có trong thread — nên phải ghi câu
+      hỏi vào thread <em>trước</em> khi gọi <code>get_user_context</code>. Thread
+      rỗng sẽ trả về context nghèo nàn.
+    </p>
+  </div>
+  <h3>Hai đường ghi vào graph</h3>
+  <p>
+    <code>graph.add(user_id=…)</code> dùng cho dữ liệu nghiệp vụ của riêng một
+    người: đơn hàng, ticket, deploy, sự cố. <code>graph.add(graph_id=…)</code>
+    dùng cho tri thức tổ chức dùng chung. Nhầm hai cái này là bug rò rỉ dữ liệu,
+    không phải bug hiệu năng.
+  </p>
+</section>
+
+<section class="wide">
+  <p class="eyebrow">Ontology tuỳ biến</p>
+  <h2>Graph có kiểu, không phải túi text</h2>
+  <p class="col" style="margin-inline:0">
+    Khi ontology được áp, Zep trích xuất JSON thô thành node và edge <em>có
+    kiểu</em>. Dữ liệu deploy/incident đẩy vào hôm nay quay ra đúng dạng này:
+  </p>
+  <div class="onto">
+    <div><span class="t">CodeRepository</span><span class="s">Service/repo mà user làm việc trên đó</span></div>
+    <div><span class="t">TechnicalDecision</span><span class="s">Quyết định kỹ thuật và nơi nó được chốt</span></div>
+    <div><span class="t">CodingConvention</span><span class="s">Quy ước ngôn ngữ, style một repo tuân theo</span></div>
+    <div><span class="t">RuntimeEnvironment</span><span class="s">Nơi repo chạy: staging, production</span></div>
+    <div><span class="t">EngineeringIncident</span><span class="s">Sự cố, root cause, postmortem</span></div>
+  </div>
+  <div class="onto">
+    <div><span class="t">WORKS_ON</span><span class="s">người → repository</span></div>
+    <div><span class="t">DECIDED_IN</span><span class="s">quyết định → thread/cuộc họp</span></div>
+    <div><span class="t">FOLLOWS_CONVENTION</span><span class="s">repository → quy ước</span></div>
+    <div><span class="t">RUNS_IN</span><span class="s">repository → môi trường</span></div>
+    <div><span class="t">OWNS</span><span class="s">team/người → repo hoặc sự cố</span></div>
+  </div>
+</section>
+
+<section class="col">
+  <p class="eyebrow">Scope</p>
+  <h2>Chọn sai scope là mất điểm</h2>
+  <p>
+    <code>graph.search</code> có nhiều scope và chúng <strong>không tương
+    đương</strong>:
+  </p>
+  <ul>
+    <li><code>episodes</code> — trả về text nguồn nguyên văn. Giữ được marker chữ như <code>PAYMENT-RULE-3</code>, <code>CONN-POOL-FIRST</code>.</li>
+    <li><code>edges</code> — trả về fact đã trích xuất, kèm <code>valid_at</code> / <code>invalid_at</code>. Đây là nơi deadline và open loop lộ ra.</li>
+    <li><code>nodes</code> — thực thể kèm summary. Dùng làm fallback.</li>
+    <li><code>auto</code> — tiện, nhưng <strong>diễn giải lại</strong> nội dung nên đánh rơi mã literal.</li>
+  </ul>
+  <div class="note n-trap">
+    <span class="h">Cái bẫy</span>
+    <p>
+      Với semantic layer, <code>scope="auto"</code> trông hợp lý nhưng làm hỏng
+      E06 và E11: ground truth yêu cầu đúng chuỗi <code>CONN-POOL-FIRST</code>,
+      mà fact đã trích xuất thì diễn đạt lại và mất mã đó. Truy hồi "đúng ý"
+      vẫn bị chấm sai vì bằng chứng không còn nguyên văn.
+    </p>
+  </div>
+</section>
+
+<section class="col">
+  <p class="eyebrow">Thời gian</p>
+  <h2>Fact cũ không bị xoá, chỉ hết hiệu lực</h2>
+  <p>
+    Minh đổi backend từ Python sang TypeScript/NestJS cho BLUEBIRD-42. Zep
+    <strong>không ghi đè</strong> fact cũ: nó gắn <code>invalid_at</code> cho
+    fact cũ và <code>valid_at</code> cho fact mới.
+  </p>
+  <p>
+    Hệ quả rất thực tế: query về project mới nhận đúng stack hiện hành, trong
+    khi lịch sử vẫn tra cứu được để giải thích "vì sao hồi đó lại chọn thế".
+    Đây là lý do tầng long-term nên tìm theo <code>edges</code> chứ không chỉ
+    dựa vào context block — validity range chỉ lộ ra ở edge.
+  </p>
+</section>
+
+<section class="wide">
+  <p class="eyebrow">Token budget</p>
+  <h2>Truy hồi đúng vẫn có thể hỏng vì quá nhiều</h2>
+  <p class="col" style="margin-inline:0">
+    Mỗi tầng chỉ được một phần context window (8.000 token). Ghép theo thứ tự
+    ưu tiên, cắt phần vượt hạn mức. Con số dưới đây là hạn mức thật của lab:
+  </p>
+  <div class="strat">
+    <div class="strat-row l-st">
+      <span class="strat-name">Short-term</span>
+      <div class="track"><div class="fill" style="width:100%"></div></div>
+      <span class="strat-val">10% · 800</span>
+    </div>
+    <div class="strat-row l-lt">
+      <span class="strat-name">Long-term</span>
+      <div class="track"><div class="fill" style="width:40%"></div></div>
+      <span class="strat-val">4% · 320</span>
+    </div>
+    <div class="strat-row l-ep">
+      <span class="strat-name">Episodic</span>
+      <div class="track"><div class="fill" style="width:30%"></div></div>
+      <span class="strat-val">3% · 240</span>
+    </div>
+    <div class="strat-row l-sem">
+      <span class="strat-name">Semantic</span>
+      <div class="track"><div class="fill" style="width:30%"></div></div>
+      <span class="strat-val">3% · 240</span>
+    </div>
+    <p class="strat-note">
+      Thanh vẽ theo tỷ lệ tương đối giữa các tầng. Tổng bốn tầng chiếm 20%
+      context window — 80% còn lại dành cho system prompt, câu hỏi và câu trả lời.
+    </p>
+  </div>
+  <p class="col" style="margin-inline:0">
+    E07 (case mixed) cho thấy budget hoạt động thật: long-term truy hồi được
+    <strong>1.493 token thô</strong> nhưng hạn mức chỉ 320, nên bị cắt còn 324;
+    semantic 148 token lọt trọn vẹn. Cả <code>Python</code> lẫn
+    <code>Idempotency-Key</code> đều sống sót sau khi cắt — vì phần đầu của mỗi
+    tầng là phần xếp hạng cao nhất.
+  </p>
+</section>
+
+<section class="wide">
+  <p class="eyebrow">Compaction</p>
+  <h2>Vì sao buffer không đủ</h2>
+  <p class="col" style="margin-inline:0">
+    Câu trả lời trực giác — "buffer làm mất deadline" — <strong>sai</strong>.
+    Buffer giữ tất cả nên chẳng mất gì. Điểm yếu thật chỉ lộ ra khi áp token
+    budget:
+  </p>
+  <div class="tablewrap">
+    <table>
+      <caption>Đo thực tế · cùng một hội thoại, kéo dài dần</caption>
+      <thead>
+        <tr>
+          <th>Số lượt</th>
+          <th class="num">Buffer</th>
+          <th class="num">Sliding</th>
+          <th>Sau khi cắt về 800 token</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="num">14</td><td class="num">231</td><td class="num">287</td><td>cả hai lọt hạn mức</td></tr>
+        <tr><td class="num">50</td><td class="num">748</td><td class="num">763</td><td>cả hai lọt hạn mức</td></tr>
+        <tr><td class="num">200</td><td class="num">2.930</td><td class="num">764</td><td>buffer <span class="fail">mất lượt mới nhất</span></td></tr>
+        <tr><td class="num">600</td><td class="num">8.780</td><td class="num">764</td><td>buffer vượt cả context window</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="col" style="margin-inline:0">
+    Ở 200 lượt, buffer bị cắt còn 804 token và <strong>mất chính lượt mới
+    nhất</strong> — hỏng đúng chức năng của short-term memory. Sliding giữ
+    phẳng ở 764 token, vừa còn deadline vừa còn lượt mới nhất.
+  </p>
+  <div class="col" style="margin-inline:0">
+    <div class="note n-key">
+      <span class="h">Nguyên tắc</span>
+      <p>
+        Compaction không phải "tóm tắt cho gọn". Summary phải ưu tiên
+        <strong>state, decision, TODO, constraint</strong>. Với
+        <code>max_recent_messages=4</code>, lượt chat gốc chứa
+        <code>REVIEW-DEADLINE-1600</code> bị đẩy khỏi cửa sổ, nhưng durable note
+        đã tách nó ra kịp nên ràng buộc vẫn sống.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="wide">
+  <p class="eyebrow">Kết quả đo</p>
+  <h2>Có ký ức và không có ký ức</h2>
+  <div class="tablewrap">
+    <table>
+      <caption>11 case · reports/benchmark.json</caption>
+      <thead>
+        <tr>
+          <th>Case</th>
+          <th>Tầng</th>
+          <th>Kết quả</th>
+          <th class="num">Token</th>
+          <th class="num">Latency</th>
+          <th>Bằng chứng bắt buộc</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>E01</td><td><span class="pill p-st">short</span></td><td class="pass">PASS</td><td class="num">133</td><td class="num">0 ms</td><td><code>ORCHID-27</code></td></tr>
+        <tr><td>E10</td><td><span class="pill p-st">short</span></td><td class="pass">PASS</td><td class="num">195</td><td class="num">0 ms</td><td><code>REVIEW-DEADLINE-1600</code></td></tr>
+        <tr><td>E02</td><td><span class="pill p-lt">long</span></td><td class="pass">PASS</td><td class="num">1.494</td><td class="num">1.729 ms</td><td><code>Python</code></td></tr>
+        <tr><td>E03</td><td><span class="pill p-lt">long</span></td><td class="pass">PASS</td><td class="num">1.491</td><td class="num">2.596 ms</td><td>open loop · <code>16:00</code></td></tr>
+        <tr><td>E08</td><td><span class="pill p-lt">long</span></td><td class="pass">PASS</td><td class="num">1.476</td><td class="num">2.242 ms</td><td>recency · <code>NestJS</code></td></tr>
+        <tr><td>E09</td><td><span class="pill p-lt">long</span></td><td class="pass">PASS</td><td class="num">769</td><td class="num">1.424 ms</td><td>isolation · <code>LOTUS-88</code></td></tr>
+        <tr><td>E04</td><td><span class="pill p-ep">episodic</span></td><td class="pass">PASS</td><td class="num">248</td><td class="num">272 ms</td><td><code>concurrency=20</code></td></tr>
+        <tr><td>E05</td><td><span class="pill p-ep">episodic</span></td><td class="pass">PASS</td><td class="num">267</td><td class="num">281 ms</td><td><code>connection churn</code></td></tr>
+        <tr><td>E06</td><td><span class="pill p-sem">semantic</span></td><td class="pass">PASS</td><td class="num">148</td><td class="num">597 ms</td><td><code>Idempotency-Key</code></td></tr>
+        <tr><td>E11</td><td><span class="pill p-sem">semantic</span></td><td class="pass">PASS</td><td class="num">146</td><td class="num">260 ms</td><td><code>CONN-POOL-FIRST</code></td></tr>
+        <tr><td>E07</td><td><span class="pill p-mix">mixed</span></td><td class="pass">PASS</td><td class="num">485</td><td class="num">2.630 ms</td><td>long-term + semantic</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="col" style="margin-inline:0">
+    Baseline tắt durable memory chỉ qua được <strong>E01 và E10</strong> — đúng
+    hai case short-term, vì bằng chứng vẫn nằm trong thread hiện tại. Bốn tầng
+    còn lại rơi về 0%.
+  </p>
+  <div class="tablewrap">
+    <table>
+      <caption>reports/comparison.md</caption>
+      <thead>
+        <tr><th>Chỉ số</th><th class="num">Có memory</th><th class="num">Không memory</th><th class="num">Chênh</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Evidence hit rate</td><td class="num">100%</td><td class="num">18,2%</td><td class="num pass">+81,8%</td></tr>
+        <tr><td>Case PASS</td><td class="num">11/11</td><td class="num">2/11</td><td class="num pass">+9</td></tr>
+        <tr><td>Token reduction</td><td class="num">14,2%</td><td class="num">81,8%</td><td class="num">−67,6%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col" style="margin-inline:0">
+    <div class="note n-trap">
+      <span class="h">Chỉ số đánh lừa</span>
+      <p>
+        Baseline "tiết kiệm" 81,8% token — nghe như thắng, nhưng nó tiết kiệm vì
+        <em>không truy hồi gì cả</em>. Token reduction chỉ có nghĩa khi đọc kèm
+        hit rate. Ngược lại, 7/11 case có memory đạt reduction 0% vì context
+        block dài hơn cả transcript gốc: đó là cái giá phải trả cho recall.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="col">
+  <p class="eyebrow">Quản trị</p>
+  <h2>Quyền được lãng quên phải xác minh được</h2>
+  <p>
+    Ba lớp bảo vệ, theo thứ tự thời gian của dữ liệu:
+  </p>
+  <ul>
+    <li><strong>Trước khi ghi</strong> — consent gate (opt-in) và PII minimization tự động che email/số điện thoại.</li>
+    <li><strong>Khi bảo trì</strong> — heartbeat chỉ được khử trùng lặp và đánh dấu stale; <em>không</em> được tự thêm chỉ thị hay nâng quyền vào durable memory.</li>
+    <li><strong>Khi xoá</strong> — xoá phải đi kèm bước xác minh trên <em>mọi</em> store, không chỉ store chính.</li>
+  </ul>
+  <p>
+    Drill hôm nay xoá <code>minh-lab17</code> rồi kiểm chứng: mọi
+    <code>graph.search</code> trên user đó đều lỗi, trong khi
+    <code>lan-lab17</code> và semantic KB dùng chung vẫn nguyên vẹn. Đó mới là
+    bằng chứng deletion đúng phạm vi — xoá quá tay cũng là lỗi.
+  </p>
+  <div class="note n-key">
+    <span class="h">Vì sao KB dùng chung không bị xoá</span>
+    <p>
+      Semantic graph chứa tri thức domain, không chứa PII của user. Xoá nó khi
+      một người rời đi là phá hoại tài sản chung mà không tăng thêm chút quyền
+      riêng tư nào.
+    </p>
+  </div>
+</section>
+
+<section class="col">
+  <p class="eyebrow">Ghi chú vận hành</p>
+  <h2>Bốn thứ chỉ biết khi chạy thật</h2>
+  <h3>Ingestion là bất đồng bộ</h3>
+  <p>
+    Vừa <code>graph.add</code> xong mà search ngay thì không thấy gì. Phải poll
+    đến khi marker xuất hiện. Đây là nguyên nhân số một của "FAIL hàng loạt"
+    ngay sau khi seed.
+  </p>
+  <h3>Query bị chặn ở 400 ký tự</h3>
+  <p>
+    <code>graph.search</code> từ chối query dài hơn 400 ký tự. Câu hỏi trong bộ
+    golden có thể dài 450–600, nên phải cắt về biên từ gần nhất trước khi gửi.
+  </p>
+  <h3>Priming thread là thao tác phá huỷ</h3>
+  <p>
+    Hàm mồi thread cho evaluation sẽ <em>xoá và tạo lại</em> thread. Dùng nhầm
+    nó trên thread chat đang sống sẽ thổi bay lịch sử vừa ghi — chat live cần
+    một thread riêng.
+  </p>
+  <h3>Episode dài lấn át episode ngắn</h3>
+  <p>
+    Message session thường dài dòng; dưới hạn mức 3%, hai episode như vậy đủ
+    đẩy văng các reflection ngắn mang marker. Cắt độ dài mỗi episode khi render
+    giữ được <em>nhiều</em> episode khác nhau hơn trong cùng ngân sách.
+  </p>
+</section>
+
+<footer>
+  Lab 17 — Multi-Memory Agent · Zep Cloud V3 · LangGraph · Redis · Qdrant<br>
+  Số liệu lấy từ <code>reports/benchmark.json</code>, <code>reports/comparison.md</code> và log đo compaction, chạy ngày 17/08/2026.
+</footer>

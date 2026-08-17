@@ -1,4 +1,4 @@
-.PHONY: up down build smoke seed demo student baseline compare test short local agent sessions episodes heartbeat compiled forget golden ui report student-report golden-report clean
+.PHONY: up down build smoke seed demo student baseline compare test short local agent sessions episodes heartbeat compiled forget golden ui report student-report golden-report zep-demo clean
 
 build:
 	docker compose build
@@ -50,6 +50,11 @@ heartbeat:
 
 compiled:
 	docker compose run --rm app python -m src.compiled_kb --reset
+
+# End-to-end Zep integration walkthrough: signup -> thread -> messages ->
+# context block -> user graph -> org graph.
+zep-demo:
+	docker compose run --rm app python -m src.demo_zep_integration --cleanup
 
 forget:
 	docker compose run --rm app python -m src.forget --user-id minh-lab17

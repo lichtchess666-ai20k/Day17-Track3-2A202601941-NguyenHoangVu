@@ -1,0 +1,12 @@
+=== Post-forget retrieval proof: minh-lab17 ===
+  scope=edges     ERROR=ApiError: headers: {'date': 'Mon, 17 Aug 2026 09:02:51 GMT', 'content-type': 'application/
+  scope=episodes  ERROR=ApiError: headers: {'date': 'Mon, 17 Aug 2026 09:02:52 GMT', 'content-type': 'application/
+  scope=nodes     ERROR=ApiError: headers: {'date': 'Mon, 17 Aug 2026 09:02:52 GMT', 'content-type': 'application/
+
+=== Control: lan-lab17 (khong bi xoa) van con ===
+  FACT: LOTUS-88 uses Java + Spring Boot for backend examples.
+  FACT: Lan Tran prefers Spring Boot for the LOTUS-88 project.
+  FACT: Lan Tran prefers Java for the LOTUS-88 project.
+
+=== Control: shared semantic KB van nguyen ven ===
+  episodes found: 2

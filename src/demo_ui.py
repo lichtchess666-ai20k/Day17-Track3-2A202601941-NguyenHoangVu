@@ -23,6 +23,7 @@ or locally:  streamlit run src/demo_ui.py
 from __future__ import annotations
 
 import sys
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -36,8 +37,9 @@ from src.config import settings
 from src.llm import gemini_available, generate_reply
 from src.memory_student import StudentMemory
 from src.short_term import ShortTermMemory
-from src.utils import GOLDEN_PATH, load_dataset, load_json
+from src.utils import GOLDEN_PATH, join_nonempty, load_dataset, load_json
 from src.zep_common import get_zep_client
+from src.zep_memory import ZepMemory
 
 LAYER_COLORS = {
     "short_term": "#2563eb",
@@ -84,31 +86,89 @@ def layer_badge(layer: str) -> str:
     return f'<span class="lab-badge" style="background:{color}">{layer}</span>'
 
 
+def seed_messages_for(case: dict[str, Any]) -> list[dict[str, str]]:
+    """Messages that make up the case's short-term window.
+
+    Fixture cases (E10) carry their own transcript; the rest replay the
+    matching thread from data/sessions.json (E01 -> thread minh-s1).
+    """
+    if case.get("fixture_messages"):
+        return list(case["fixture_messages"])
+    for user in load_dataset()["users"]:
+        if user["user_id"] != case.get("user_id"):
+            continue
+        for session in user.get("sessions", []):
+            if session["thread_id"] == case.get("thread_id"):
+                return list(session["messages"])
+    return []
+
+
+def wanted_layers(case: dict[str, Any], all_layers: bool) -> set[str]:
+    """Which durable layers to fetch for this case.
+
+    Default mirrors the benchmark: one layer per case, or `retrieve_layers`
+    for a mixed case. The chat box passes all_layers=True — a live turn has no
+    declared expected layer, so it draws on everything.
+    """
+    if all_layers:
+        return {"short_term", "long_term", "episodic", "semantic"}
+    layer = case.get("expected_layer", "mixed")
+    if layer == "mixed":
+        return set(case.get("retrieve_layers") or ["short_term", "long_term", "semantic"])
+    return {layer}
+
+
 def retrieve_for_case(
     memory: StudentMemory,
     case: dict[str, Any],
     extra_messages: list[dict[str, str]],
+    *,
+    all_layers: bool = False,
+    zep: ZepMemory | None = None,
+    live_thread_id: str | None = None,
 ) -> dict[str, Any]:
-    """BONUS TODO: run student retrieval for the loaded case.
+    """Run layered retrieval for the loaded case and merge under the budget.
 
-    Return a dict with keys:
-      - "merged_context": str  (StudentMemory.assemble_context output)
-      - "layers": dict[str, str]  (per-layer evidence: short_term/long_term/
-                                   episodic/semantic)
-      - "budget": dict  (the breakdown from assemble_context)
-
-    Hints:
-      * Build short_term from case["fixture_messages"] if present, else from
-        the matching user/thread messages in data/sessions.json, plus
-        extra_messages. E01 has no fixture — it uses thread minh-s1.
-      * Decide which durable layers to fetch from case["expected_layer"] (or
-        case["retrieve_layers"] for "mixed"), then call
-        memory.retrieve_long_term / retrieve_episodic / retrieve_semantic.
-      * Keep user_id and thread_id from the loaded case.
-      * Finish with memory.assemble_context(layers).
+    When `live_thread_id` is given (the chat box), the long-term layer reads
+    the context block of that live thread instead of priming the case's eval
+    thread — priming recreates a thread, which would discard the chat history
+    just persisted to Zep.
     """
-    _ = (memory, case, extra_messages, settings, ShortTermMemory)
-    raise NotImplementedError("BONUS TODO: run student retrieval for the loaded case")
+    query = case.get("query", "")
+    user_id = case.get("user_id", "")
+    wanted = wanted_layers(case, all_layers)
+    layers = {"short_term": "", "long_term": "", "episodic": "", "semantic": ""}
+
+    if "short_term" in wanted:
+        stm = ShortTermMemory(strategy="sliding", max_recent_messages=6, pressure_tokens=450)
+        for msg in seed_messages_for(case) + list(extra_messages):
+            stm.add(msg["role"], msg["content"])
+        layers["short_term"] = stm.render()
+
+    if "long_term" in wanted:
+        if live_thread_id and zep is not None:
+            layers["long_term"] = join_nonempty(
+                [
+                    zep.get_context_block(live_thread_id),
+                    zep.search_user_graph(user_id, query, scope="edges", limit=memory.fact_limit),
+                ],
+                sep="\n\n",
+            )
+        else:
+            layers["long_term"] = memory.retrieve_long_term(
+                user_id=user_id,
+                thread_id=case.get("thread_id", ""),
+                query=query,
+            )
+
+    if "episodic" in wanted:
+        layers["episodic"] = memory.retrieve_episodic(user_id, query)
+
+    if "semantic" in wanted:
+        layers["semantic"] = memory.retrieve_semantic(settings.semantic_graph_id, query)
+
+    merged, budget = memory.assemble_context(layers)
+    return {"merged_context": merged, "layers": layers, "budget": budget}
 
 
 def main() -> None:
@@ -149,6 +209,7 @@ def main() -> None:
         st.session_state.case_id = case["id"]
         st.session_state.chat = []
         st.session_state.pop("last_result", None)
+        st.session_state.pop("live_thread_id", None)
 
     col_run, _ = st.columns([1, 3])
     if col_run.button("▶️ Run retrieval on this case", use_container_width=True):
@@ -193,15 +254,45 @@ def main() -> None:
         with st.chat_message("user"):
             st.write(prompt)
         try:
-            memory = StudentMemory(get_zep_client())
-            follow = retrieve_for_case(memory, {**case, "query": prompt}, st.session_state.chat)
+            client = get_zep_client()
+            memory = StudentMemory(client)
+            zep = ZepMemory(client)
+
+            # One live Zep thread per chat, kept apart from the case's eval
+            # thread so retrieval never deletes the conversation.
+            thread_id = st.session_state.get("live_thread_id")
+            if not thread_id:
+                zep.on_signup(case["user_id"])
+                thread_id = zep.start_thread(
+                    case["user_id"], f"ui-{case['id']}-{uuid.uuid4().hex[:8]}".lower()
+                )
+                st.session_state.live_thread_id = thread_id
+
+            # 1. persist the incoming user message
+            zep.record_message(thread_id, "user", prompt)
+
+            # 2. retrieve — Zep context block for this thread + the other layers
+            follow = retrieve_for_case(
+                memory,
+                {**case, "query": prompt},
+                st.session_state.chat,
+                all_layers=True,
+                zep=zep,
+                live_thread_id=thread_id,
+            )
             st.session_state.last_result = follow
             context = follow.get("merged_context", "")
+
+            # 3. answer with that context in the system prompt
             if gemini_available():
                 reply = generate_reply(context, st.session_state.chat[:-1], prompt)
             else:
                 reply = ("_(Gemini key missing — showing retrieved context instead)_\n\n"
                          + (context[:1500] or "(no memory retrieved)"))
+
+            # 4. persist the assistant message
+            zep.record_message(thread_id, "assistant", reply)
+
             st.session_state.chat.append({"role": "assistant", "content": reply})
             with st.chat_message("assistant"):
                 st.write(reply)
